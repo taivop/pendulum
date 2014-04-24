@@ -4,6 +4,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
 
+
 public class CodeRecognition {
 	
 	static int imageHeight = 1200;
@@ -178,15 +179,13 @@ public class CodeRecognition {
 	
 	public static void main(String[] args) {
 		
-		String filePath = "C:\\Users\\dell\\Desktop\\katse5\\frame40.jpg";
+		String filePath = "images/frame0.jpg";
 		ImagePlus imp = new ImagePlus(filePath);
 		imageToResult(imp);
 		
-		//TODO: kui tulp on vigane ja jäetakse arvutusest välja, tee ta punase värviga
 		
 		
-		
-		String outputPath = "C:\\Users\\dell\\Desktop\\katse5\\processed\\frameproc.jpg";
+		String outputPath = "images/frame0_proc";
 		IJ.saveAs(imp, "jpg", outputPath);
 		imp.deleteRoi();
 		
