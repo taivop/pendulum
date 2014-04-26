@@ -9,58 +9,55 @@ import java.io.IOException;
 
 public class FileCreator {
 	
-	// n-bitised koodid
+	// n-bit Gray codes
 	static int n = 9;
-	// koode on kokku 2^n
-	static int arv = (int) Math.pow(2, n);
+	// there are a total of 2^n codes
+	static int numOfCodes = (int) Math.pow(2, n);
 	
+	// Read in codes from specified file.
 	public static int[][] readCodesFromFile(String filePath) throws IOException{
-		int koodid[][] = new int[arv][n];
+		int codes[][] = new int[numOfCodes][n];
 		
 		File codeInputFile = new File(filePath);
 		BufferedReader br = new BufferedReader(new FileReader(codeInputFile));
 		
 		int i = 0;
-		String sone;
-		int massiiv[] = new int[n];
+		String str;
+		int oneCode[] = new int[n];
 		
-		while(i < arv && br.ready()) {
-			sone = br.readLine().trim();
+		while(i < numOfCodes && br.ready()) {
+			str = br.readLine().trim();
 			//System.out.println(sone);
 			
 			for(int j=0; j<n; j++) {
-				massiiv[j] = Integer.parseInt(Character.toString(sone.charAt(j)));
-				/*if(sone.charAt(j) == '1') {
-					massiiv[j] = 1;
-				} else {
-					massiiv[j] = 0;
-				}*/
+				oneCode[j] = Integer.parseInt(Character.toString(str.charAt(j)));
 			}
 			
-			koodid[i] = (int[]) massiiv.clone();
+			codes[i] = (int[]) oneCode.clone();
 			
 			i++;
 		}		
-			
-		return koodid;
+		
+		br.close();
+		return codes;
 		
 	}
-
+	
+	// Create and write a SVG document of Gray codes.
 	public static void main(String[] args) throws Exception {
 		
-		int xlaius = 20;
-		//int kastikorgus = 70;
-		int kastikorgus = (int) 1.0865 * xlaius / n;
-		int xnihe = 0;
+		int xWidth = 20;
+		int boxHeight = (int) 1.0865 * xWidth / n;
+		int xOffset = 0;
 		
-		int ribakorgus = Math.max(kastikorgus / 4, 1);
-		int padding = Math.max(kastikorgus / 2, 2);
+		int bandHeight = Math.max(boxHeight / 4, 1);
+		int padding = Math.max(boxHeight / 2, 2);
 		
-		int koodid[][] = readCodesFromFile("graycodes.csv");
+		int codes[][] = readCodesFromFile("graycodes.csv");
 		
-		File output = new File("gray.html");
+		File outputFile = new File("gray.html");
 		
-		FileWriter fw = new FileWriter(output.getAbsoluteFile());
+		FileWriter fw = new FileWriter(outputFile.getAbsoluteFile());
 		BufferedWriter bw = new BufferedWriter(fw);
 		
 		bw.write("<?xml version=\"1.0\" standalone=\"no\"?>" +
@@ -69,21 +66,13 @@ public class FileCreator {
 				"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 		
 		
-		for(int i=0; i<arv; i++) {
-			/*System.out.print(koodid[i][0]);
-			System.out.print(koodid[i][1]);
-			System.out.print(koodid[i][2]);
-			System.out.print(koodid[i][3]);
-			System.out.print(koodid[i][4]);
-			System.out.print(koodid[i][5]);
-			System.out.print(koodid[i][6]);
-			System.out.println(koodid[i][7]);*/
-			bw.write(GrayCreator.kood(koodid[i], xnihe, xlaius, padding, kastikorgus));
-			xnihe += xlaius;
+		for(int i=0; i<numOfCodes; i++) {
+			bw.write(GrayCreator.codeToRect(codes[i], xOffset, xWidth, padding, boxHeight));
+			xOffset += xWidth;
 		}
 		
-		bw.write("<rect x=\"0\" y=\"0\" width=\"" + (arv * xlaius) + "\" height=\"" + ribakorgus + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
-		bw.write("<rect x=\"0\" y=\"" + (2 * padding + n * kastikorgus - ribakorgus) + "\" width=\"" + (arv * xlaius) + "\" height=\"" + ribakorgus + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
+		bw.write("<rect x=\"0\" y=\"0\" width=\"" + (numOfCodes * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
+		bw.write("<rect x=\"0\" y=\"" + (2 * padding + n * boxHeight - bandHeight) + "\" width=\"" + (numOfCodes * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
 		
 		System.out.println("writing...");
 		

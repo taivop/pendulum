@@ -7,6 +7,8 @@ import ij.gui.Roi;
 
 public class CodeRecognition {
 	
+	// Some constants that will be used throughout the code.
+	// TODO: read these in from a file or implement a better system for organising them.
 	static int imageHeight = 1200;
 	static int imageWidth = 1600;
 	static int columnWidth = 10;
@@ -179,6 +181,7 @@ public class CodeRecognition {
 	
 	public static void main(String[] args) {
 		
+		// Do some offline testing without the camera.
 		String filePath = "images/frame0.jpg";
 		ImagePlus imp = new ImagePlus(filePath);
 		imageToResult(imp);

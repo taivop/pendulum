@@ -2,28 +2,29 @@ package svg;
 
 public class GrayCreator {
 	
-	public static String kood(int[] massiiv, int xnihe, int xlaius, int padding, int kastikorgus) {
-		String tulemus = "";
+	public static String codeToRect(int[] bitArray, int xOffset, int xWidth, int padding, int boxHeight) {
+		String result = "";
 		
 		int y = 0;
 		
-		for(int bitt : massiiv) {
-			if(bitt == 1) {
-				tulemus += "<rect x=\"" + xnihe + "\" y=\"" + (y + padding) + "\" width=\"" + xlaius + "\" height=\"" + kastikorgus +
+		for(int bit : bitArray) {
+			if(bit == 1) {
+				result += "<rect x=\"" + xOffset + "\" y=\"" + (y + padding) + "\" width=\"" + xWidth + "\" height=\"" + boxHeight +
 						"\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>";
-				tulemus += "\n";
+				result += "\n";
 			}
 			
-			y += kastikorgus;
+			y += boxHeight;
 		}
 		
 		
 		
-		return tulemus;
+		return result;
 	}
 
 	public static void main(String[] args) {
-		int m[] = {1, 1, 0, 0, 0, 1, 0, 1};
+		// Do some testing
+		// int m[] = {1, 1, 0, 0, 0, 1, 0, 1};
 		//System.out.println(kood(m, 0, 50, 50));
 
 	}
