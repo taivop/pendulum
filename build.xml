@@ -1,6 +1,6 @@
 <project name="Pendelprojekt" default="dist" basedir=".">
     <description>
-        simple example build file
+        build file
     </description>
   <!-- set global properties for this build -->
   <property name="src" location="src"/>
@@ -34,7 +34,7 @@
     <!-- Create the distribution directory -->
     <mkdir dir="${dist}/lib"/>
 
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
+    <!-- Put everything in ${build} into the Pendel-${DSTAMP}.jar file -->
     <jar jarfile="${dist}/lib/Pendel-${DSTAMP}.jar">
     	<fileset dir="${build}" />
     	<fileset dir="${lib}" includes="**/*.jar"/>
