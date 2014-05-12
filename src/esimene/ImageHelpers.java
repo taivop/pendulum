@@ -8,10 +8,12 @@ import ij.process.ImageProcessor;
 import java.util.Set;
 
 public class ImageHelpers {
-	static boolean vocal = MainCameraWatcher.vocal;
+	static boolean vocal = MainCameraWatcher.IS_VOCAL;
 
-	// returns y-coordinates of [top, bottom] edges
 		public static int[] topAndBottom(ImagePlus imp, Roi columnRoi, int imageHeight, double decisionLimitRow) {
+			// Get the top and bottom edges of the code for a column.
+			
+			
 			// Duplicate the original image and then cut it, leaving just the desired column
 			ImagePlus smallImp = imp.duplicate();
 			smallImp.setRoi(columnRoi);
@@ -48,12 +50,5 @@ public class ImageHelpers {
 			int[] result = {codeTop, codeBottom};
 			
 			return result;
-		}
-		
-		public static void fillRois(ImagePlus imp, Set<Roi> toBeFilled) {
-			for(Roi r : toBeFilled) {
-				imp.setRoi(r);
-				IJ.run(imp, "Fill", "slice");
-			}
 		}
 }

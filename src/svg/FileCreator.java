@@ -8,28 +8,29 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class FileCreator {
+	// Purpose of this class: to create an SVG file from given 9-bit Gray codes.
 	
 	// n-bit Gray codes
-	static int n = 9;
+	static int N = 9;
 	// there are a total of 2^n codes
-	static int numOfCodes = (int) Math.pow(2, n);
+	static int NUMBER_OF_CODES = (int) Math.pow(2, N);
 	
-	// Read in codes from specified file.
 	public static int[][] readCodesFromFile(String filePath) throws IOException{
-		int codes[][] = new int[numOfCodes][n];
+		// Read in codes from specified file.
+		int codes[][] = new int[NUMBER_OF_CODES][N];
 		
 		File codeInputFile = new File(filePath);
 		BufferedReader br = new BufferedReader(new FileReader(codeInputFile));
 		
 		int i = 0;
 		String str;
-		int oneCode[] = new int[n];
+		int oneCode[] = new int[N];
 		
-		while(i < numOfCodes && br.ready()) {
+		while(i < NUMBER_OF_CODES && br.ready()) {
 			str = br.readLine().trim();
 			//System.out.println(sone);
 			
-			for(int j=0; j<n; j++) {
+			for(int j=0; j<N; j++) {
 				oneCode[j] = Integer.parseInt(Character.toString(str.charAt(j)));
 			}
 			
@@ -43,11 +44,31 @@ public class FileCreator {
 		
 	}
 	
-	// Create and write a SVG document of Gray codes.
+	public static String codeToRect(int[] bitArray, int xOffset, int xWidth, int padding, int boxHeight) {
+		String result = "";
+		
+		int y = 0;
+		
+		for(int bit : bitArray) {
+			if(bit == 1) {
+				result += "<rect x=\"" + xOffset + "\" y=\"" + (y + padding) + "\" width=\"" + xWidth + "\" height=\"" + boxHeight +
+						"\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>";
+				result += "\n";
+			}
+			
+			y += boxHeight;
+		}
+		
+		
+		
+		return result;
+	}
+	
 	public static void main(String[] args) throws Exception {
+		// Create and write a SVG document of Gray codes.
 		
 		int xWidth = 20;
-		int boxHeight = (int) 1.0865 * xWidth / n;
+		int boxHeight = (int) 1.0865 * xWidth / N;
 		int xOffset = 0;
 		
 		int bandHeight = Math.max(boxHeight / 4, 1);
@@ -66,13 +87,13 @@ public class FileCreator {
 				"<svg xmlns=\"http://www.w3.org/2000/svg\" version=\"1.1\">");
 		
 		
-		for(int i=0; i<numOfCodes; i++) {
-			bw.write(GrayCreator.codeToRect(codes[i], xOffset, xWidth, padding, boxHeight));
+		for(int i=0; i<NUMBER_OF_CODES; i++) {
+			bw.write(FileCreator.codeToRect(codes[i], xOffset, xWidth, padding, boxHeight));
 			xOffset += xWidth;
 		}
 		
-		bw.write("<rect x=\"0\" y=\"0\" width=\"" + (numOfCodes * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
-		bw.write("<rect x=\"0\" y=\"" + (2 * padding + n * boxHeight - bandHeight) + "\" width=\"" + (numOfCodes * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
+		bw.write("<rect x=\"0\" y=\"0\" width=\"" + (NUMBER_OF_CODES * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
+		bw.write("<rect x=\"0\" y=\"" + (2 * padding + N * boxHeight - bandHeight) + "\" width=\"" + (NUMBER_OF_CODES * xWidth) + "\" height=\"" + bandHeight + "\"  style=\"fill:black;stroke-width:0;stroke:rgb(0,0,0)\"/>");
 		
 		System.out.println("writing...");
 		

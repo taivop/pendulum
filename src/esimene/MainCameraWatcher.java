@@ -29,18 +29,19 @@ import com.lti.civil.awt.AWTImageConverter;
 
 public class MainCameraWatcher
 {
+	final static boolean IS_WRITING_FILES = true;			// Do we want to save files?
+    final static int FRAME_DELAY = 5;						// We will be saving a frame every 'frameDelay' seconds
+    final static boolean IS_VOCAL = false;					// Do we want to print debug info all the time?
+    final static boolean SHOWING_IMAGES = false;			// Do we want to display images from webcam?
+    final static int M = 6;									// The amount of sensing columns on either side of the center
+    final static int N = 2 * M + 1;							// The total amount of sensing columns
+    final static long WALLTIME = 120000;					// For how long will we be recording (in seconds)?
+    
 	static long startTime;
 	static long lastFrameTime = 0;
 	static double elapsed = 0;
-    final static long sleepDuration = 120000;				// For how long will we be recording?
-    final static boolean isWritingFiles = true;		// Do we want to save files?
-    static int frameDelay = 5;						// We will be saving a frame every 'frameDelay' seconds
-    static int frameDelayLowerLimit = 1;			// Minimum possible value for frameDelay
     static ImagePlus currentImp;
-    static boolean vocal = false;
-    static boolean show = false;
-    static int M = 6;								// The amount of sensing columns on either side of the center
-    static int N = 2 * M + 1;
+    
     
 	
 	public static void main(String[] args) throws CaptureException
@@ -52,7 +53,6 @@ public class MainCameraWatcher
 		int chosenHeight = 1200;
 		
 		startTime = System.nanoTime();
-		frameDelay = frameDelay <= frameDelayLowerLimit ? frameDelayLowerLimit : frameDelay;
 		
 		// Communicating with all available cameras
 		CaptureSystemFactory factory = DefaultCaptureSystemFactorySingleton.instance();
@@ -115,7 +115,7 @@ public class MainCameraWatcher
 		
 		try
 		{
-			Thread.sleep(sleepDuration * 1000);
+			Thread.sleep(WALLTIME * 1000);
 		}
 		catch (InterruptedException e)
 		{
@@ -137,6 +137,7 @@ public class MainCameraWatcher
 	}
 	
 	public static String videoFormatToString(VideoFormat f)
+	// Helper function for better display.
 	{
 		return "Type=" + formatTypeToString(f.getFormatType()) + " Width=" + f.getWidth() + " Height=" + f.getHeight() + " FPS=" + f.getFPS(); 
 	}
@@ -158,6 +159,7 @@ public class MainCameraWatcher
 
 class MyCaptureObserver2 implements CaptureObserver
 {
+	// The observer that receives images and turns them into an angle value.
 
 	int inputHeight;
 	int inputWidth;
@@ -166,9 +168,11 @@ class MyCaptureObserver2 implements CaptureObserver
 	int frameCounter;
 	
 	
-	MyCaptureObserver2(int height) {
+	MyCaptureObserver2(int height) {		
+		// Size of input image
 		inputHeight = height;
 		inputWidth = height * 4 / 3;
+		// Size of display, if displaying is activated.
 		displayHeight = inputHeight / 2;
 		displayWidth = inputWidth / 2;
 		System.out.print("\n[OK ] Observer started.");
@@ -183,15 +187,18 @@ class MyCaptureObserver2 implements CaptureObserver
 
 	public void onNewImage(CaptureStream sender, Image image)
 	{	
-		boolean vocal = MainCameraWatcher.vocal;
+		boolean vocal = MainCameraWatcher.IS_VOCAL;
 		long currentTime = System.nanoTime();
 		long lastFrameTime = MainCameraWatcher.lastFrameTime;
+		
 		if(lastFrameTime == 0) {
+			// If we just started recording
 			lastFrameTime = currentTime;
 			MainCameraWatcher.lastFrameTime = currentTime;
 		}
 		
-		if(lastFrameTime == currentTime || (int) ((currentTime - lastFrameTime) / 1000000000.0) > MainCameraWatcher.frameDelay) {
+		if(lastFrameTime == currentTime || (int) ((currentTime - lastFrameTime) / 1000000000.0) > MainCameraWatcher.FRAME_DELAY) {
+			// If enough time has passed to accept another frame, start processing it. Otherwise, just ignore the frame.
 			MainCameraWatcher.lastFrameTime = System.nanoTime();
 
 			// close last image
@@ -205,7 +212,7 @@ class MyCaptureObserver2 implements CaptureObserver
 			MainCameraWatcher.currentImp = new ImagePlus("pilt", ip);
 			
 			// show current image
-			if(MainCameraWatcher.show) {
+			if(MainCameraWatcher.SHOWING_IMAGES) {
 				MainCameraWatcher.currentImp.show();
 			}
 			
@@ -239,7 +246,7 @@ class MyCaptureObserver2 implements CaptureObserver
 				System.out.printf("\n[INF] t = %5.2f s", MainCameraWatcher.elapsed);
 			}*/
 			
-			if(MainCameraWatcher.isWritingFiles) {
+			if(MainCameraWatcher.IS_WRITING_FILES) {
 		
 				// Encode as a JPEG	
 				try

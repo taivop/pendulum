@@ -5,12 +5,12 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
+// This class handles writing data to files.
 public class DataSaver {
-	static boolean vocal = MainCameraWatcher.vocal;
+	static boolean vocal = MainCameraWatcher.IS_VOCAL;
 	static String outputFilenameBase = "pendliandmed/andmed_";
 	
 	public static void writeToFile(double angle, Date time) {
@@ -27,7 +27,7 @@ public class DataSaver {
 			out.println((timestamp + ";" + angle).replaceAll("\\.", ","));
 			out.close();
 		} catch(Exception e) {
-			// Fail gracefully
+			// Fail gracefully... kind of.
 			System.out.println("\n[ERR] Did not write measurement to file.");
 			if(vocal) {
 				e.printStackTrace();
@@ -35,11 +35,9 @@ public class DataSaver {
 		}	
 	}
 	
-	// Gets filename based on filename base and given time
+	// Get filename based on filename base and given time
 	public static String getFilename(Date time) {
 		DateFormat sdf = new SimpleDateFormat("MMM");
-		
-		Calendar calendar = new GregorianCalendar();
 		
 		String month = sdf.format(time);
 		sdf = new SimpleDateFormat("yyyy");

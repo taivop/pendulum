@@ -12,13 +12,16 @@ import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 public class StatisticsHelpers {
-	static boolean vocal = MainCameraWatcher.vocal;
+	// A class containing most of the statistical/math functions used.
+	
+	static boolean vocal = MainCameraWatcher.IS_VOCAL;
 	static int N = MainCameraWatcher.N;
 	static int M = MainCameraWatcher.M;
 	static boolean[] includedColumns;
 	
-	// Fit all data points to a line found from valid data points
 	public static double[] correctWithRegression(double[] lineData, boolean[] inclusionArray) {
+		// Fit all data points to a line found from valid data points
+		
 		SimpleRegression reg = new SimpleRegression(true);
 		
 		// Add data
@@ -44,8 +47,8 @@ public class StatisticsHelpers {
 		return lineData;
 	}
 	
-	// Finds the data point that lies the furthest from median
 	public static int getOutlier(double[] lineDataIn, double[] originalLineData, boolean onARing) {
+		// Find the data point that lies the furthest from median
 
 		Median med = new Median();
 		double median = med.evaluate(lineDataIn);
@@ -75,9 +78,9 @@ public class StatisticsHelpers {
 	}
 	
 	
-	
-	// Removes the given data point
 	public static double[] removeDataPoint(double[] lineDataIn, double[] originalLineData, int outlier, boolean isAngle) {
+		// Removes the given data point from the array
+		
 		double[] lineDataOut = new double[lineDataIn.length-1];
 		//System.out.printf("\n--- lineDataIn length %d, removing element %d", lineDataIn.length, toBeRemoved);
 		int toBeRemoved = outlier;
@@ -100,8 +103,10 @@ public class StatisticsHelpers {
 		return lineDataOut;
 	}
 	
-	// Finds the average value of pixels over the given region
+	
 	public static double getAverage(ImagePlus imp, Roi roi) {
+		// Finds the average value (average lightness) of pixels over the given region
+		
 		double result = 0;
 		int count = 0;
 		ImageProcessor ip = imp.getProcessor();
@@ -118,8 +123,8 @@ public class StatisticsHelpers {
 		return result;
 	}
 	
-	// Converts an array of ints to an array of doubles
 	public static double[] intArrayToDouble(int[] input) {
+		// Converts an array of ints to an array of doubles
 		int numOfDataPoints = input.length;
 		double[] output = new double[numOfDataPoints];
 		for(int i=0; i<numOfDataPoints; i++) {
@@ -128,8 +133,8 @@ public class StatisticsHelpers {
 		return output;
 	}
 	
-	// Converts an array of doubles to ints
 	public static int[] doubleArrayToInt(double[] input) {
+		// Converts an array of doubles to ints
 		int numOfDataPoints = input.length;
 		int[] output = new int[numOfDataPoints];
 		for(int i=0; i<numOfDataPoints; i++) {
@@ -138,18 +143,9 @@ public class StatisticsHelpers {
 		return output;
 	}
 	
-	
-	public static void rectifyColumnData(int[][] columnData) {
-		for(int rowNum=0; rowNum < 9; rowNum++) {
-			for(int colNum=1; colNum < N-1; colNum ++) {			// Do not check the leftmost and rightmost columns
-				if(columnData[colNum-1] == columnData[colNum+1]) {
-					//columnData[colNum] = columnData[colNum-1];
-				}
-			}
-		}
-	}
-	
 	public static double[] rectifyLineData(double[] lineDataDouble, int stdevLimit) {
+		// Remove outliers one by one until standard deviation is lower than the limit.
+		
 		double[] originalLineData = lineDataDouble.clone();
 		boolean[] inclusionArray = new boolean[originalLineData.length];
 		for(int i=0; i<originalLineData.length; i++) {
@@ -180,6 +176,8 @@ public class StatisticsHelpers {
 	}
 	
 	static double makeDecision(double[] angles, double angleVarianceLimit) {
+		// Using angle values from the columns given, decide on the final value we are at.
+		
 		double[] anglesOriginal = angles.clone();
 		double decision = Double.POSITIVE_INFINITY;
 		boolean[] inclusionArray = new boolean[angles.length];
@@ -226,9 +224,10 @@ public class StatisticsHelpers {
 			}
 		}
 		
-		includedColumns = inclusionArray.clone();;
+		includedColumns = inclusionArray.clone();
 		
 		// Let's find the CIRCULAR mean of column predictions and use it as our decision
+		// Circular mean takes into account that 359 degrees and 1 degrees are close by etc. 
 		decision = circularMean(predictions);
 		
 		//decision = (36.11 - mean);
@@ -239,8 +238,8 @@ public class StatisticsHelpers {
 		return decision;
 	}
 	
-	// Find the circular mean of the given data
 	static double circularMean(double[] data) {
+		// Find the circular mean of the given data
 		// From http://en.wikipedia.org/wiki/Circular_mean
 		double result = 0;
 		double sumOfSines = 0;
@@ -266,6 +265,7 @@ public class StatisticsHelpers {
 	}
 	
 	static double circularVariance(double[] data) {
+		// Find the circular variance of the data.
 		// From http://www.ebi.ac.uk/thornton-srv/software/PROCHECK/nmr_manual/man_cv.html
 		int count = 0;
 		double sumOfSines = 0;

@@ -9,21 +9,23 @@ public class CodeRecognition {
 	
 	// Some constants that will be used throughout the code.
 	// TODO: read these in from a file or implement a better system for organising them.
-	static int imageHeight = 1200;
-	static int imageWidth = 1600;
+	static int IMAGE_HEIGHT = 1200;
+	static int IMAGE_WIDTH = 1600;
 	static int columnWidth = 10;
-	static int middleX = imageWidth / 2;
+	static int middleX = IMAGE_WIDTH / 2;
 	static int columnSpacing = 50;
 	static int lineStdevLimit = 10;
 	static double angleCircvarLimit = 0.01;
 	static double decisionLimitRow = 0.4;
 	static double decisionLimitSample = 0.75;	
 	static final boolean show = false;
-	static boolean vocal = MainCameraWatcher.vocal;
+	static boolean vocal = MainCameraWatcher.IS_VOCAL;
 	static int M = MainCameraWatcher.M;
 	static int N = MainCameraWatcher.N;
 	
 	public static double imageToResult(ImagePlus imp) {
+		// Turn an image to an angle.
+		
 		int[][] columnData = new int[N][9];
 		int[][] lineData = new int[N][2];
 		double[] angles = new double[N];
@@ -35,7 +37,8 @@ public class CodeRecognition {
 		IJ.run(imp, "Make Binary", "");
 		
 		// If the top 20 rows are black, we invert the picture
-		double topRowsAverage = StatisticsHelpers.getAverage(imp, new Roi(1, 1, imageWidth, 20));
+		// Necessary because the "Make Binary function" binarises the wrong way if image is too dark.
+		double topRowsAverage = StatisticsHelpers.getAverage(imp, new Roi(1, 1, IMAGE_WIDTH, 20));
 		//System.out.printf("Average value of top row pixels: %2f\n", topRowsAverage);
 		if(topRowsAverage > 0.75) {
 			IJ.run(imp, "Invert", "");
@@ -43,21 +46,21 @@ public class CodeRecognition {
 		
 		
 		
-		
+		// Find the top and bottom boundaries at each column.
 		for(int i=-M; i <= M; i++) {
 			
 			int leftBound = middleX + i * columnSpacing + i * columnWidth + (int) (Math.signum(i) * columnWidth / 2);
 			if(i == 0) {
 				leftBound = middleX - columnWidth / 2;
-				imp.setRoi(leftBound, 0, columnWidth, imageHeight);
+				imp.setRoi(leftBound, 0, columnWidth, IMAGE_HEIGHT);
 			} else {
 				if(i > 0) {
 					leftBound = leftBound - columnWidth;
 				}
-				imp.setRoi(leftBound, 0, columnWidth, imageHeight);
+				imp.setRoi(leftBound, 0, columnWidth, IMAGE_HEIGHT);
 			}
 			
-			lineData[i+M] = ImageHelpers.topAndBottom(imp, imp.getRoi(), imageHeight, decisionLimitRow);
+			lineData[i+M] = ImageHelpers.topAndBottom(imp, imp.getRoi(), IMAGE_HEIGHT, decisionLimitRow);
 		}
 		
 		
@@ -90,27 +93,27 @@ public class CodeRecognition {
 			System.out.printf("\n[OK ] Bottom line fitted.");
 		}
 		
-		
+		// Find the bar code values at each column.
 		for(int i=-M; i <= M; i++) {
 			
 			int leftBound = middleX + i * columnSpacing + i * columnWidth + (int) (Math.signum(i) * columnWidth / 2);
 			if(i == 0) {
 				leftBound = middleX - columnWidth / 2;
-				imp.setRoi(leftBound, 0, columnWidth, imageHeight);
+				imp.setRoi(leftBound, 0, columnWidth, IMAGE_HEIGHT);
 			} else {
 				if(i > 0) {
 					leftBound = leftBound - columnWidth;
 				}
-				imp.setRoi(leftBound, 0, columnWidth, imageHeight);
+				imp.setRoi(leftBound, 0, columnWidth, IMAGE_HEIGHT);
 			}
 			
 			int[] code = processColumn(imp, imp.getRoi(), topLineData[i+M], bottomLineData[i+M], i+M);
 			columnData[i+M] = code;
-			int codeValue = GeneralHelpers.grayToValue(code);
-			double angle = GeneralHelpers.codeValueToAngle(codeValue);
+			int codeValue = GrayCodeHelpers.grayToValue(code);
+			double angle = GrayCodeHelpers.codeValueToAngle(codeValue);
 			angles[i+M] = angle;
 			if(vocal) {
-				System.out.printf("\n[INF] Column %+d: %s\tValue: %d\t Angle: %.2f", i, GeneralHelpers.codeToString(code), codeValue, angle);			
+				System.out.printf("\n[INF] Column %+d: %s\tValue: %d\t Angle: %.2f", i, GrayCodeHelpers.codeToString(code), codeValue, angle);			
 			}
 		}
 		
@@ -136,6 +139,8 @@ public class CodeRecognition {
 	
 	
 	public static int[] processColumn(ImagePlus imp, Roi columnRoi, int codeTop, int codeBottom, int colNum) {
+		// Turn a column into a binary array (barcode).
+		
 		int[] code = new int[9];
 
 		int codeHeight = codeBottom - codeTop;
@@ -180,7 +185,7 @@ public class CodeRecognition {
 	
 	
 	public static void main(String[] args) {
-		
+		// For testing purposes		
 		// Do some offline testing without the camera.
 		String filePath = "images/frame0.jpg";
 		ImagePlus imp = new ImagePlus(filePath);

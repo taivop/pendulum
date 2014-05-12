@@ -6,6 +6,9 @@ import ij.ImagePlus;
 import java.util.HashSet;
 import java.util.Set;
 
+// This class is only used if we are displaying the webcam images.
+// Draws dots on the image according to where measurements where taken and which ones were discarded.
+
 public class ColumnFilling {
 	static final int Green = 0;
 	static final int Red = 1;
