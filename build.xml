@@ -1,4 +1,4 @@
-<project name="Pendelprojekt" default="dist" basedir=".">
+<project name="Pendelprojekt" default="compile" basedir=".">
     <description>
         build file
     </description>
