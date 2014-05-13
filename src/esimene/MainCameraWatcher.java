@@ -36,7 +36,7 @@ public class MainCameraWatcher
     final static int M = 6;									// The amount of sensing columns on either side of the center
     final static int N = 2 * M + 1;							// The total amount of sensing columns
     final static long WALLTIME = 120000;					// For how long will we be recording (in seconds)?
-    final static String CAMERA_NAME = "PC VGA Camer@ Plus";	// What's the name of the camera we are using in the device list?
+    final static String CAMERA_NAME = "/dev/video0";	// What's the name of the camera we are using in the device list?
     
 	static long startTime;
 	static long lastFrameTime = 0;
@@ -65,6 +65,7 @@ public class MainCameraWatcher
 		for (int i = 0; i < list.size(); ++i)
 		{
 			System.out.print("\n[...] Looking for camera, listing available cameras...");
+			System.out.printf("\n[...] The camera we want is called \"%s\"", MainCameraWatcher.CAMERA_NAME);
 			
 			CaptureDeviceInfo info = (CaptureDeviceInfo) list.get(i);
 			
