@@ -185,7 +185,7 @@ public class StatisticsHelpers {
 			inclusionArray[i] = true;
 		}
 		
-		while(circularVariance(angles) > angleVarianceLimit && angles.length >= 3) {
+		while(circularVariance(angles) > angleVarianceLimit && angles.length >= MainCameraWatcher.MIN_COLUMNS) {
 			// If we don't have 3 proper columns to base our decision on, then quit.
 			if(angles.length == 3) {
 				return Double.POSITIVE_INFINITY;

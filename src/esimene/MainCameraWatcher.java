@@ -35,8 +35,9 @@ public class MainCameraWatcher
     final static boolean SHOWING_IMAGES = false;			// Do we want to display images from webcam?
     final static int M = 6;									// The amount of sensing columns on either side of the center
     final static int N = 2 * M + 1;							// The total amount of sensing columns
+    final static int MIN_COLUMNS = 5;						// The minimum amount of agreeing columns where we will still output a reliable decision.
     final static long WALLTIME = 120000;					// For how long will we be recording (in seconds)?
-    final static String CAMERA_NAME = "/dev/video0";	// What's the name of the camera we are using in the device list?
+    final static String CAMERA_NAME = "PC VGA Camer@ Plus";//"/dev/video0";	// What's the name of the camera we are using in the device list?
     
 	static long startTime;
 	static long lastFrameTime = 0;
