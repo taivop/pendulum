@@ -131,9 +131,8 @@ public class CodeRecognition {
 		
 		// Draw some markers
 		IJ.run(imp, "RGB Color", "");
-		
 		ColumnFilling.fillRois(imp, StatisticsHelpers.includedColumns);
-		ColumnFilling.toBeFilled.clear();
+		ColumnFilling.clearRoiSet();
 		return decision;
 	}
 	

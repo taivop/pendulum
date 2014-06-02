@@ -26,4 +26,8 @@ public class ColumnFilling {
 			IJ.run(imp, "Fill", "slice");
 		}
 	}
+	
+	public static void clearRoiSet() {
+		toBeFilled.clear();
+	}
 }

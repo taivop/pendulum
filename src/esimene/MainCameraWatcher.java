@@ -239,6 +239,7 @@ class MyCaptureObserver2 implements CaptureObserver
 		        
 			} catch(Exception e) {
 				System.out.printf("\n[ERR] Exception occurred: %s", e.getClass().getName());
+				ColumnFilling.clearRoiSet();
 			}
 			
 			
