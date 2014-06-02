@@ -29,13 +29,13 @@ import com.lti.civil.awt.AWTImageConverter;
 
 public class MainCameraWatcher
 {
-	final static boolean IS_WRITING_FILES = true;			// Do we want to save files?
+	final static boolean IS_WRITING_FILES = false;			// Do we want to save frames?
     final static int FRAME_DELAY = 5;						// We will be saving a frame every 'frameDelay' seconds
     final static boolean IS_VOCAL = false;					// Do we want to print debug info all the time?
-    final static boolean SHOWING_IMAGES = false;			// Do we want to display images from webcam?
+    final static boolean SHOWING_IMAGES = true;			// Do we want to display images from webcam?
     final static int M = 6;									// The amount of sensing columns on either side of the center
     final static int N = 2 * M + 1;							// The total amount of sensing columns
-    final static int MIN_COLUMNS = 5;						// The minimum amount of agreeing columns where we will still output a reliable decision.
+    final static int MIN_COLUMNS = 7;						// The minimum amount of agreeing columns where we will still output a reliable decision.
     final static long WALLTIME = 120000;					// For how long will we be recording (in seconds)?
     final static String CAMERA_NAME = "PC VGA Camer@ Plus";//"/dev/video0";	// What's the name of the camera we are using in the device list?
     
@@ -220,20 +220,27 @@ class MyCaptureObserver2 implements CaptureObserver
 			}
 			
 			// get angle
-			double angle = CodeRecognition.imageToResult(MainCameraWatcher.currentImp);
-			
-			// send angle to data saver to be saved
-			Calendar calendar = new GregorianCalendar();
-			Date time = calendar.getTime();
-			DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
-			String timestamp = sdf.format(time);
-			System.out.printf(" " + timestamp);
-			
-	        DataSaver.writeToFile(angle, time);
-			
-			if(vocal) {
-				System.out.printf("\n[INF] Current angle: %.2f", angle);
+			try {
+				double angle = CodeRecognition.imageToResult(MainCameraWatcher.currentImp);
+				
+				// send angle to data saver to be saved
+				Calendar calendar = new GregorianCalendar();
+				Date time = calendar.getTime();
+				DateFormat sdf = new SimpleDateFormat("dd-MM-yyyy hh:mm:ss");
+				String timestamp = sdf.format(time);
+				System.out.printf(" " + timestamp);
+				
+				// write angle to file
+		        DataSaver.writeToFile(angle, time);
+		        
+		        if(vocal) {
+					System.out.printf("\n[INF] Current angle: %.2f", angle);
+				}
+		        
+			} catch(Exception e) {
+				System.out.printf("\n[ERR] Exception occurred: %s", e.getClass().getName());
 			}
+			
 			
 			MainCameraWatcher.currentImp.deleteRoi();
 			

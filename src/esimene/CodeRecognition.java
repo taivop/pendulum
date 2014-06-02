@@ -23,7 +23,7 @@ public class CodeRecognition {
 	static int M = MainCameraWatcher.M;
 	static int N = MainCameraWatcher.N;
 	
-	public static double imageToResult(ImagePlus imp) {
+	public static double imageToResult(ImagePlus imp) throws UnreliableMeasurementException {
 		// Turn an image to an angle.
 		
 		int[][] columnData = new int[N][9];
@@ -125,7 +125,8 @@ public class CodeRecognition {
 		if(decision >= 0) {
 			System.out.printf("\n[OK ] Decision: %.1f degrees.", decision);
 		} else {
-			System.out.printf("\n[ERR] Could not make reliable decision.", decision);
+			throw new UnreliableMeasurementException();
+			//System.out.printf("\n[ERR] Could not make reliable decision.", decision);
 		}
 		
 		// Draw some markers
@@ -189,7 +190,7 @@ public class CodeRecognition {
 		// Do some offline testing without the camera.
 		String filePath = "images/frame0.jpg";
 		ImagePlus imp = new ImagePlus(filePath);
-		imageToResult(imp);
+		//imageToResult(imp);
 		
 		
 		

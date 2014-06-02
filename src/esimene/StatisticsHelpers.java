@@ -175,7 +175,7 @@ public class StatisticsHelpers {
 		return originalLineData;
 	}
 	
-	static double makeDecision(double[] angles, double angleVarianceLimit) {
+	static double makeDecision(double[] angles, double angleVarianceLimit) throws UnreliableMeasurementException {
 		// Using angle values from the columns given, decide on the final value we are at.
 		
 		double[] anglesOriginal = angles.clone();
@@ -187,8 +187,8 @@ public class StatisticsHelpers {
 		
 		while(circularVariance(angles) > angleVarianceLimit && angles.length >= MainCameraWatcher.MIN_COLUMNS) {
 			// If we don't have 3 proper columns to base our decision on, then quit.
-			if(angles.length == 3) {
-				return Double.POSITIVE_INFINITY;
+			if(angles.length == MainCameraWatcher.MIN_COLUMNS) {
+				throw new UnreliableMeasurementException();
 			}
 			
 			int outlier = StatisticsHelpers.getOutlier(angles, anglesOriginal, true);

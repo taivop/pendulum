@@ -28,8 +28,9 @@ public class DataSaver {
 			out.close();
 		} catch(Exception e) {
 			// Fail gracefully... kind of.
-			System.out.println("\n[ERR] Did not write measurement to file.");
+			System.out.print("\n[ERR] Did not write measurement to file.");
 			if(vocal) {
+				System.out.println();
 				e.printStackTrace();
 			}
 		}	
