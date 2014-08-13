@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Properties;
 
 import javax.imageio.ImageIO;
 
@@ -29,16 +30,18 @@ import com.lti.civil.awt.AWTImageConverter;
 
 public class MainCameraWatcher
 {
-	final static boolean IS_WRITING_FILES = false;			// Do we want to save frames?
-    final static int FRAME_DELAY = 5;						// We will be saving a frame every 'frameDelay' seconds
-    final static boolean IS_VOCAL = false;					// Do we want to print debug info all the time?
-    final static boolean SHOWING_IMAGES = true;			// Do we want to display images from webcam?
-    final static int M = 6;									// The amount of sensing columns on either side of the center
-    final static int N = 2 * M + 1;							// The total amount of sensing columns
-    final static int MIN_COLUMNS = 7;						// The minimum amount of agreeing columns where we will still output a reliable decision.
-    final static long WALLTIME = 120000;					// For how long will we be recording (in seconds)?
-    final static String CAMERA_NAME = "PC VGA Camer@ Plus";//"/dev/video0";	// What's the name of the camera we are using in the device list?
+	static boolean IS_WRITING_FILES;			// Do we want to save frames?
+    static int FRAME_DELAY;						// We will be saving a frame every 'frameDelay' seconds
+    static boolean IS_VOCAL;					// Do we want to print debug info all the time?
+    static boolean SHOWING_IMAGES;			// Do we want to display images from webcam?
+    static int M;									// The amount of sensing columns on either side of the center
+    static int MIN_COLUMNS;						// The minimum amount of agreeing columns where we will still output a reliable decision.
+    static long WALLTIME;					// For how long will we be recording (in seconds)?
+    static String CAMERA_NAME;			// What's the name of the camera we are using in the device list?
+    static float COLUMNSPACINGS_PER_CODEWITH;
+    static int IMAGE_HEIGHT;
     
+    static int N;							// The total amount of sensing columns
 	static long startTime;
 	static long lastFrameTime = 0;
 	static double elapsed = 0;
@@ -48,11 +51,53 @@ public class MainCameraWatcher
 	
 	public static void main(String[] args) throws CaptureException
 	{	
+		// Initialise properties that have been read in from file
+		String propertiesFileName = "config.properties";
+		String defaultPropertiesFileName = "config_default.properties";
+		try {
+			Properties prop = FileHandler.readProperties(propertiesFileName);
+			IS_WRITING_FILES = Boolean.parseBoolean(prop.getProperty("IS_WRITING_FILES"));
+			FRAME_DELAY = Integer.parseInt(prop.getProperty("FRAME_DELAY"));
+			IS_VOCAL = Boolean.parseBoolean(prop.getProperty("IS_VOCAL"));
+			SHOWING_IMAGES = Boolean.parseBoolean(prop.getProperty("SHOWING_IMAGES"));
+			M = Integer.parseInt(prop.getProperty("M"));
+			MIN_COLUMNS = Integer.parseInt(prop.getProperty("MIN_COLUMNS"));
+			WALLTIME = Long.parseLong(prop.getProperty("WALLTIME"));
+			COLUMNSPACINGS_PER_CODEWITH = Float.parseFloat(prop.getProperty("COLUMNSPACINGS_PER_CODEWITH"));
+			CAMERA_NAME = prop.getProperty("CAMERA_NAME");
+			IMAGE_HEIGHT = Integer.parseInt(prop.getProperty("IMAGE_HEIGHT"));
+			
+			N = 2 * M + 1;
+			
+			System.out.printf("\n[OK ] Successfully read settings from %s.", propertiesFileName);
+			
+		} catch (Exception e) {
+			try {
+			Properties prop = FileHandler.readProperties(defaultPropertiesFileName);
+			IS_WRITING_FILES = Boolean.parseBoolean(prop.getProperty("IS_WRITING_FILES"));
+			FRAME_DELAY = Integer.parseInt(prop.getProperty("FRAME_DELAY"));
+			IS_VOCAL = Boolean.parseBoolean(prop.getProperty("IS_VOCAL"));
+			SHOWING_IMAGES = Boolean.parseBoolean(prop.getProperty("SHOWING_IMAGES"));
+			M = Integer.parseInt(prop.getProperty("M"));
+			MIN_COLUMNS = Integer.parseInt(prop.getProperty("MIN_COLUMNS"));
+			WALLTIME = Long.parseLong(prop.getProperty("WALLTIME"));
+			COLUMNSPACINGS_PER_CODEWITH = Float.parseFloat(prop.getProperty("COLUMNSPACINGS_PER_CODEWITH"));
+			CAMERA_NAME = prop.getProperty("CAMERA_NAME");
+			IMAGE_HEIGHT = Integer.parseInt(prop.getProperty("IMAGE_HEIGHT"));
+			
+			N = 2 * M + 1;
+			
+			System.out.printf("\n[INF] Could not read settings from file %s. Falling back to default settings from %s.", propertiesFileName, defaultPropertiesFileName);
+			} catch (Exception e2) {
+				abnormalExit(String.format("Could not read settings from neither %s or %s.", propertiesFileName, defaultPropertiesFileName));
+			}
+		}
+		
+		
 		// Initialise some stuff
 		int chosenCamera = -1;
 		String chosenCameraID = "";
 		VideoFormat chosenFormat = null;
-		int chosenHeight = 1200;
 		
 		startTime = System.nanoTime();
 		
@@ -86,25 +131,31 @@ public class MainCameraWatcher
 		
 		// If camera was not found, exit program.
 		if(chosenCamera == -1) {
-			System.out.print("\n[ERR] End of list, camera not found!");
-			System.out.print("\n[ERR] Abnormal exit.");
-			System.exit(1);
+			abnormalExit("End of list, camera not found!");
 		}
 		
 		CaptureStream captureStream = system.openCaptureDeviceStream(chosenCameraID);
 		
-		System.out.print("\n[...] Choosing format...");
+		System.out.printf("\n[...] Choosing format... Looking for one with height=%d\n", IMAGE_HEIGHT);
 		for (VideoFormat format : captureStream.enumVideoFormats())
-		{
-			if(format.getHeight() == chosenHeight) {
+		{	
+			if(format.getWidth() != 0) {
+				System.out.printf("        %s\n", videoFormatToString(format));
+			}
+			if(format.getHeight() == IMAGE_HEIGHT) {
 				// Choose highest resolution format (for this camera, this means height = 1200px)
 				chosenFormat = format;
-				System.out.print("\n[OK ] Format chosen: " + videoFormatToString(format));
 			}			
 		}
+		if(chosenFormat == null) {
+			// If we didn't find a suitable format
+			abnormalExit("Could not choose video format. Are you sure this is the correct camera?");
+		} else {
+			System.out.print("\n[OK ] Format chosen: " + videoFormatToString(chosenFormat));
+		}
 		
-		System.out.print("\n[...] Starting observer, height " + chosenHeight + "...");
-		MyCaptureObserver2 observer = new MyCaptureObserver2(chosenHeight);
+		System.out.print("\n[...] Starting observer, height " + chosenFormat.getHeight() + "...");
+		MyCaptureObserver2 observer = new MyCaptureObserver2(chosenFormat.getHeight());
 		captureStream.setObserver(observer);
 		
 		System.out.print("\n[...] Setting video format...");
@@ -139,10 +190,16 @@ public class MainCameraWatcher
 
 	}
 	
+	private static void abnormalExit(String errorMessage) {
+		System.out.printf("\n[ERR] %s", errorMessage);
+		System.out.print("\n[ERR] Abnormal exit.");
+		System.exit(1);
+	}
+	
 	public static String videoFormatToString(VideoFormat f)
 	// Helper function for better display.
 	{
-		return "Type=" + formatTypeToString(f.getFormatType()) + " Width=" + f.getWidth() + " Height=" + f.getHeight() + " FPS=" + f.getFPS(); 
+		return formatTypeToString(f.getFormatType()) + " | size=" + f.getWidth() + "x" + f.getHeight() + " | FPS " + f.getFPS(); 
 	}
 	
 	private static String formatTypeToString(int f)
@@ -231,7 +288,7 @@ class MyCaptureObserver2 implements CaptureObserver
 				System.out.printf(" " + timestamp);
 				
 				// write angle to file
-		        DataSaver.writeToFile(angle, time);
+		        FileHandler.writeDataToFile(angle, time);
 		        
 		        if(vocal) {
 					System.out.printf("\n[INF] Current angle: %.2f", angle);

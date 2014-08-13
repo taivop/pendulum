@@ -17,6 +17,7 @@ public class StatisticsHelpers {
 	static boolean vocal = MainCameraWatcher.IS_VOCAL;
 	static int N = MainCameraWatcher.N;
 	static int M = MainCameraWatcher.M;
+	static float COLUMNSPACINGS_PER_CODEWITH = MainCameraWatcher.COLUMNSPACINGS_PER_CODEWITH;
 	static boolean[] includedColumns;
 	
 	public static double[] correctWithRegression(double[] lineData, boolean[] inclusionArray) {
@@ -208,7 +209,7 @@ public class StatisticsHelpers {
 		for(int i=0; i<N; i++) {
 			// Let's look at all the columns that show a reasonable value
 			if(inclusionArray[i]) {
-				double myDistance = ((i-M) * 360.0 / 512 / 3.45);		// The distance of this column from the middle one. The last divisor is the ratio of columnspacings per codewidth. Value has been measured from an image.
+				double myDistance = ((i-M) * 360.0 / 512 / COLUMNSPACINGS_PER_CODEWITH);		// The distance of this column from the middle one. The last divisor is the ratio of columnspacings per codewidth. Value has been measured from an image.
 				predictions[i] = anglesOriginal[i] + myDistance;
 				if(predictions[i] < 0) {
 					predictions[i] = 360 + predictions[i];
