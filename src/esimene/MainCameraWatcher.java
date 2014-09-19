@@ -32,6 +32,7 @@ public class MainCameraWatcher
 {
 	static boolean IS_WRITING_FILES;			// Do we want to save frames?
     static int FRAME_DELAY;						// We will be saving a frame every 'frameDelay' seconds
+    static boolean ROTATE_180;					// Rotate the image by 180 degrees?
     static boolean IS_VOCAL;					// Do we want to print debug info all the time?
     static boolean SHOWING_IMAGES;			// Do we want to display images from webcam?
     static int M;									// The amount of sensing columns on either side of the center
@@ -51,6 +52,8 @@ public class MainCameraWatcher
 	
 	public static void main(String[] args) throws CaptureException
 	{	
+		System.out.println("Java library path:\n" + System.getProperty("java.library.path"));
+		
 		// Initialise properties that have been read in from file
 		String propertiesFileName = "config.properties";
 		String defaultPropertiesFileName = "config_default.properties";
@@ -58,6 +61,7 @@ public class MainCameraWatcher
 			Properties prop = FileHandler.readProperties(propertiesFileName);
 			IS_WRITING_FILES = Boolean.parseBoolean(prop.getProperty("IS_WRITING_FILES"));
 			FRAME_DELAY = Integer.parseInt(prop.getProperty("FRAME_DELAY"));
+			ROTATE_180 = Boolean.parseBoolean(prop.getProperty("ROTATE_180"));
 			IS_VOCAL = Boolean.parseBoolean(prop.getProperty("IS_VOCAL"));
 			SHOWING_IMAGES = Boolean.parseBoolean(prop.getProperty("SHOWING_IMAGES"));
 			M = Integer.parseInt(prop.getProperty("M"));
@@ -76,6 +80,7 @@ public class MainCameraWatcher
 			Properties prop = FileHandler.readProperties(defaultPropertiesFileName);
 			IS_WRITING_FILES = Boolean.parseBoolean(prop.getProperty("IS_WRITING_FILES"));
 			FRAME_DELAY = Integer.parseInt(prop.getProperty("FRAME_DELAY"));
+			ROTATE_180 = Boolean.parseBoolean(prop.getProperty("ROTATE_180"));
 			IS_VOCAL = Boolean.parseBoolean(prop.getProperty("IS_VOCAL"));
 			SHOWING_IMAGES = Boolean.parseBoolean(prop.getProperty("SHOWING_IMAGES"));
 			M = Integer.parseInt(prop.getProperty("M"));
@@ -270,6 +275,11 @@ class MyCaptureObserver2 implements CaptureObserver
 			BufferedImage inputImage = AWTImageConverter.toBufferedImage(image);
 			ImageProcessor ip = new ColorProcessor(inputImage);
 			MainCameraWatcher.currentImp = new ImagePlus("pilt", ip);
+			
+			// rotate image
+			if (MainCameraWatcher.ROTATE_180) {
+				MainCameraWatcher.currentImp.getProcessor().rotate(180);
+			}
 			
 			// show current image
 			if(MainCameraWatcher.SHOWING_IMAGES) {
